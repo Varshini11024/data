@@ -42,22 +42,26 @@ def draw_segmentation_map(image, masks, boxes, labels):
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     for i in range(len(masks)):
         # apply a randon color mask to each object
-        color = COLORS[coco_names.index(labels[i])]
+        # color = COLORS[coco_names.index(labels[i])]
+        color = tuple(int(c) for c in np.random.uniform(0, 255, size=3))
         if masks[i].any() == True:
-            red_map = np.zeros_like(masks[i]).astype(np.uint8)
-            green_map = np.zeros_like(masks[i]).astype(np.uint8)
-            blue_map = np.zeros_like(masks[i]).astype(np.uint8)
-            red_map[masks[i] == 1], green_map[masks[i] == 1], blue_map[masks[i] == 1] = color
+        #     red_map = np.zeros_like(masks[i]).astype(np.uint8)
+        #     green_map = np.zeros_like(masks[i]).astype(np.uint8)
+        #     blue_map = np.zeros_like(masks[i]).astype(np.uint8)
+        #     red_map[masks[i] == 1], green_map[masks[i] == 1], blue_map[masks[i] == 1] = color
+            segmentation_map = np.zeros_like(image)
+            # assign the random color to the mask
+            segmentation_map[masks[i] == 1] = color
             # combine all the masks into a single image
-            segmentation_map = np.stack([red_map, green_map, blue_map], axis=2)
+            # segmentation_map = np.stack([red_map, green_map, blue_map], axis=2)
             # apply mask on the image
             cv2.addWeighted(image, alpha, segmentation_map, beta, gamma, image)
 
             # draw the bounding boxes around the objects
             cv2.rectangle(image, boxes[i][0], boxes[i][1], color=color, 
-                        thickness=2)
+                        thickness=1)
             # put the label text above the objects
             cv2.putText(image , labels[i], (boxes[i][0][0], boxes[i][0][1]-10), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, color, 
-                        thickness=2, lineType=cv2.LINE_AA)
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.4, color, 
+                        thickness=1, lineType=cv2.LINE_AA)
     return image
